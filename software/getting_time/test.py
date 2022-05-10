@@ -35,6 +35,9 @@ itdLPxx_timeFormat=24
 
 url=url.replace("\n","")
 
+print('URL: ')
+print(url)
+
 page=requests.get(url)
 soup=bs(page.content,"html.parser")
 
