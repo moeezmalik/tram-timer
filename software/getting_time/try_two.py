@@ -1,7 +1,9 @@
 import requests
 from bs4 import BeautifulSoup as bs
-import re
-import urllib3
+
+haltestelle_nummer = 6930651
+target_linie = '3'
+target_richtung = 'Haid'
 
 url = '''
 https://preview.efa-bw.de/efabw_preview/XSLT_DM_REQUEST?
@@ -14,7 +16,7 @@ includeCompleteStopSeq=1&
 mergeDep=1&
 useRealtime=1&
 mode=direct&
-name_dm=Freiburg+im+Breisgau%2C+Paula-Modersohn-Platz&
+name_dm={}&
 type_dm=any&
 nameInfo_dm=6930651&
 deleteAssignedStops=1&
@@ -45,7 +47,7 @@ imparedOptionsActive=1&
 sessionID=0&
 requestID=0&
 itdLPxx_directRequest=1&
-coordOutputFormat=WGS84[dd.ddddd]'''
+coordOutputFormat=WGS84[dd.ddddd]'''.format(haltestelle_nummer)
 
 url = url.replace("\n","")
 headers = {'User-Agent': 'Mozilla/5.0'}
@@ -54,15 +56,26 @@ response = requests.get(url, headers=headers)
 # Beautiful Soup Starts Here
 
 soup = bs(response.content, 'html.parser')
-results = soup.find_all('div', {'class' : 'std3_col-xs-12 std3_full-size std3_departure-line std3_result-row std3_assigned-StopID-6930651 6930651'})
+results = soup.find_all('div', {'class' : '''std3_col-xs-12 std3_full-size std3_departure-line std3_result-row std3_assigned-StopID-{} {}'''.format(haltestelle_nummer, haltestelle_nummer)})
 
 for result in results:
     heute_zeit = result.find('div', {'class' : 'std3_dm-time std3_dm-result-row'})
     echt_zeit = result.find('div', {'class' : 'std3_dm-time std3_dm-result-row std3_realtime-column'})
+    richtung = result.find('a', {'class' : 'std3_trip-stop-times-trigger'})
+    mot_und_linie = result.find('span', {'class' : 'std3_mot-label'}).text
+    mot_und_linie = mot_und_linie.split()
+    mot = mot_und_linie[0]
+    linie = mot_und_linie[1]
 
-    print(f"Geplannt Zeit: {heute_zeit.text}")
-    print(f"Echt Zeit: {echt_zeit.text}")
-    print()
+    if (linie == target_linie and richtung.text == target_richtung):
+
+        print(f"Geplannt Zeit: {heute_zeit.text}")
+        print(f"Echt Zeit: {echt_zeit.text}")
+        print(f"Linie: {linie}")
+        print(f"Richtung: {richtung.text}")
+        print()
+
+        break
 
 with open("output2.html", "w") as file:
     file.write(str(results))
