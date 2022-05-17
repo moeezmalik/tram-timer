@@ -8,9 +8,9 @@ from datetime import datetime
 
 
 class Status(Enum):
-    ALL_GOOD = 1            # This will be generated when everything goes well
-    HTTP_ERROR = 2          # This will be generated when the BWEGT server throws an error
-    MOT_NOT_FOUND = 3       # This will be generated when Mode of Transport is not found
+    ALL_GOOD = "all_good"                       # This will be generated when everything goes well
+    HTTP_ERROR = "http_error"                   # This will be generated when the BWEGT server throws an error
+    MOT_NOT_FOUND = "vehicle_not_found"         # This will be generated when Mode of Transport is not found
 
 def getDifferenceInMinutes(vehicle_time):
     ###############################################
@@ -102,23 +102,18 @@ def getNextTwoVehicleTimes(html_content, stop_id, target_line, target_direction)
     vehicle_times = ['null', 'null']
 
     for result in results:
-        heute_zeit = result.find('div', {'class' : 'std3_dm-time std3_dm-result-row'})
-        echt_zeit = result.find('div', {'class' : 'std3_dm-time std3_dm-result-row std3_realtime-column'})
-        richtung = result.find('a', {'class' : 'std3_trip-stop-times-trigger'})
-        mot_und_linie = result.find('span', {'class' : 'std3_mot-label'}).text
-        mot_und_linie = mot_und_linie.split()
-        mot = mot_und_linie[0]
-        linie = mot_und_linie[1]
 
-        if (linie == target_line and richtung.text == target_direction):
+        planned_time = result.find('div', {'class' : 'std3_dm-time std3_dm-result-row'})
+        real_time = result.find('div', {'class' : 'std3_dm-time std3_dm-result-row std3_realtime-column'})
+        direction = result.find('a', {'class' : 'std3_trip-stop-times-trigger'})
+        mot_and_line = result.find('span', {'class' : 'std3_mot-label'}).text.split()
 
-            print(f"Geplannt Zeit: {heute_zeit.text}")
-            print(f"Echt Zeit: {echt_zeit.text}")
-            print(f"Linie: {linie}")
-            print(f"Richtung: {richtung.text}")
-            print()
+        mot = mot_and_line[0]
+        line = mot_and_line[1]
 
-            vehicle_times[count] = echt_zeit.text
+        if (line == str(target_line) and direction.text == target_direction):
+
+            vehicle_times[count] = real_time.text
             count += 1
 
             if(count == 2):
@@ -128,7 +123,7 @@ def getNextTwoVehicleTimes(html_content, stop_id, target_line, target_direction)
 
 def getETAOfNextMOT(stop_id, target_line, target_direction):
 
-    reply = {'status' : Status.ALL_GOOD, 'response' : {}}
+    reply = {'status' : Status.ALL_GOOD, 'response' : { 'eta' : {}, 'time' : {} }}
 
     status_code, content = getHTMLContent(stop_id)
 
@@ -138,18 +133,11 @@ def getETAOfNextMOT(stop_id, target_line, target_direction):
 
         if(vehicle_times[0] != 'null' and vehicle_times[0] != 'null'):
             eta = getETA(vehicle_times)
-            reply['response'] = eta
+            reply['response']['eta'] = eta
         else:
             reply['status'] = Status.MOT_NOT_FOUND
-
     else:
         reply['status'] = Status.HTTP_ERROR
 
-
-    if(reply['status'] == Status.ALL_GOOD):
-        print("Vehicle comes in {} min".format(eta))
-    else:
-        print("Some Error Occurred")
-
-    print()
+    return reply
 
