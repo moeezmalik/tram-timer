@@ -55,11 +55,13 @@ def getDifferenceInMinutes(vehicle_time):
 
 def getETA(vehicle_times):
     eta = getDifferenceInMinutes(vehicle_times[0])
+    time = vehicle_times[0]
 
     if(eta == 0):
         eta = getDifferenceInMinutes(vehicle_times[1])
+        time = vehicle_times[1]
 
-    return eta
+    return eta, time
 
 def getHTMLContent(stop_id):
     ###############################################
@@ -132,8 +134,11 @@ def getETAOfNextMOT(stop_id, target_line, target_direction):
         vehicle_times = getNextTwoVehicleTimes(content, stop_id, target_line, target_direction)
 
         if(vehicle_times[0] != 'null' and vehicle_times[0] != 'null'):
-            eta = getETA(vehicle_times)
+            eta, time = getETA(vehicle_times)
+            
             reply['response']['eta'] = eta
+            reply['response']['time'] = time
+            
         else:
             reply['status'] = Status.MOT_NOT_FOUND
     else:
