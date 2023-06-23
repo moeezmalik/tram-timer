@@ -1,1 +1,0 @@
-{"id":"36839f43-f3c5-4a2e-a65c-fba0abb8b3f2","space":22999,"runtime":"python3.9","name":"backend","path":"csj4xc","project":"a03dmvei","account":"144798365827","region":"eu-central-1","deps":["fastapi","requests","bs4","pytz","pyyaml"],"envs":null,"public":true,"log_level":"debug","cron":""}
