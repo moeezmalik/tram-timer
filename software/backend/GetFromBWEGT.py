@@ -84,9 +84,17 @@ def getHTMLContent(stop_id):
     headers = {'User-Agent': 'Mozilla/5.0'}
     response = requests.get(url, headers=headers)
 
+    # print(url)
+    
     return response.status_code, response.content
 
 def getNextTwoVehicleTimes(html_content, stop_id, target_line, target_direction):
+
+    # Some preprocessing on the target direction
+    # Remove the first and last character of the string to remove
+    # the quotation marks
+    target_direction = target_direction[1:-1]
+
     soup = bs(html_content, 'html.parser')
 
     # Get the Element that contains the city and the station name
@@ -113,9 +121,21 @@ def getNextTwoVehicleTimes(html_content, stop_id, target_line, target_direction)
         mot = mot_and_line[0]
         line = mot_and_line[1]
 
+        
+
         if (line == str(target_line) and direction.text == target_direction):
 
-            vehicle_times[count] = real_time.text
+            # print(planned_time.text)
+            # print(real_time.text)
+            # print(direction.text)
+            # print(mot)
+            # print(line)
+
+            if(real_time.text == ' '):
+                vehicle_times[count] = planned_time.text
+            else:
+                vehicle_times[count] = real_time.text
+            
             count += 1
 
             if(count == 2):
@@ -136,7 +156,7 @@ def getETAOfNextMOT(stop_id, target_line, target_direction):
         if(vehicle_times[0] != 'null' and vehicle_times[0] != 'null'):
             eta, time = getETA(vehicle_times)
             
-            reply['response']['eta'] = eta
+            reply['response']['eta'] = (eta)
             reply['response']['time'] = time
             
         else:

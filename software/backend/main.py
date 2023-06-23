@@ -4,9 +4,15 @@ import json
 
 app = FastAPI()
 
+print("hello")
+
 @app.get("/")
 def index():
     return {"name" : "First Data"}
+
+@app.get("/test")
+def index():
+    return {"hello" : "world"}
 
 @app.get("/get-time")
 def get_tram(stop_id, target_line, target_direction):

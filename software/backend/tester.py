@@ -1,7 +1,9 @@
 from GetFromBWEGT import getETAOfNextMOT
 
 stop_id = 6930651
-target_line = 3
-target_direction = 'Haid'
+stop_id = 6930813
+
+target_line = 4
+target_direction = 'Zähringen'
 
 print(getETAOfNextMOT(stop_id, target_line, target_direction))
